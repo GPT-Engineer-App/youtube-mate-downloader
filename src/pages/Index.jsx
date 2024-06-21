@@ -9,27 +9,51 @@ const Index = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  const isValidYouTubeUrl = (url) => {
+    const regex = /^(https?\:\/\/)?(www\.youtube\.com|youtu\.?be)\/.+$/;
+    return regex.test(url);
+  };
+
   const handleDownload = async () => {
     setLoading(true);
     setError("");
     setSuccess("");
     setDownloadLink("");
 
+    if (!isValidYouTubeUrl(url)) {
+      setError("Please enter a valid YouTube URL.");
+      setLoading(false);
+      return;
+    }
+
     try {
-      // Replace with a real YouTube download API endpoint
-      const response = await fetch(`https://api.example.com/download?url=${encodeURIComponent(url)}&format=${format}`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 seconds timeout
+
+      const response = await fetch(`https://api.example.com/download?url=${encodeURIComponent(url)}&format=${format}`, {
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
       if (!response.ok) {
         throw new Error("Failed to download video");
       }
+
       const data = await response.json();
       if (data.status !== "success") {
         throw new Error(data.message || "Failed to download video");
       }
+
       setDownloadLink(data.downloadUrl);
       setSuccess("Download ready! Click the link below to save the video.");
     } catch (err) {
-      console.error("Error details:", err); // Log the error details for debugging
-      setError(err.message);
+      if (err.name === 'AbortError') {
+        setError("The request timed out. Please try again.");
+      } else {
+        console.error("Error details:", err); // Log the error details for debugging
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
     }
