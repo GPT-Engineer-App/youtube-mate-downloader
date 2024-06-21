@@ -5,6 +5,7 @@ const Index = () => {
   const [url, setUrl] = useState("");
   const [format, setFormat] = useState("360p");
   const [loading, setLoading] = useState(false);
+  const [downloadLink, setDownloadLink] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -12,16 +13,18 @@ const Index = () => {
     setLoading(true);
     setError("");
     setSuccess("");
+    setDownloadLink("");
 
     try {
-      // Mock API endpoint for testing
-      const response = await fetch(`https://jsonplaceholder.typicode.com/posts/1`);
+      // Replace with a real YouTube download API endpoint
+      const response = await fetch(`https://your-youtube-download-api.com/download?url=${encodeURIComponent(url)}&format=${format}`);
       if (!response.ok) {
         throw new Error("Failed to download video");
       }
-      const data = await response.json();
-      console.log(data); // Log the response data for debugging
-      setSuccess("Download started successfully!");
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      setDownloadLink(downloadUrl);
+      setSuccess("Download ready! Click the link below to save the video.");
     } catch (err) {
       console.error("Error details:", err); // Log the error details for debugging
       setError(err.message);
@@ -53,6 +56,13 @@ const Index = () => {
         </Button>
         {error && <Text color="red.500">{error}</Text>}
         {success && <Text color="green.500">{success}</Text>}
+        {downloadLink && (
+          <Box>
+            <a href={downloadLink} download="video.mp4">
+              <Button size="lg" colorScheme="green">Save Video</Button>
+            </a>
+          </Box>
+        )}
       </VStack>
     </Container>
   );
