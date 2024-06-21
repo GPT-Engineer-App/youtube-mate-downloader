@@ -17,13 +17,15 @@ const Index = () => {
 
     try {
       // Replace with a real YouTube download API endpoint
-      const response = await fetch(`https://your-youtube-download-api.com/download?url=${encodeURIComponent(url)}&format=${format}`);
+      const response = await fetch(`https://api.example.com/download?url=${encodeURIComponent(url)}&format=${format}`);
       if (!response.ok) {
         throw new Error("Failed to download video");
       }
-      const blob = await response.blob();
-      const downloadUrl = window.URL.createObjectURL(blob);
-      setDownloadLink(downloadUrl);
+      const data = await response.json();
+      if (data.status !== "success") {
+        throw new Error(data.message || "Failed to download video");
+      }
+      setDownloadLink(data.downloadUrl);
       setSuccess("Download ready! Click the link below to save the video.");
     } catch (err) {
       console.error("Error details:", err); // Log the error details for debugging
