@@ -14,14 +14,16 @@ const Index = () => {
     setSuccess("");
 
     try {
-      // Replace with actual API call
-      const response = await fetch(`https://api.example.com/download?url=${url}&format=${format}`);
+      // Mock API endpoint for testing
+      const response = await fetch(`https://jsonplaceholder.typicode.com/posts/1`);
       if (!response.ok) {
         throw new Error("Failed to download video");
       }
       const data = await response.json();
+      console.log(data); // Log the response data for debugging
       setSuccess("Download started successfully!");
     } catch (err) {
+      console.error("Error details:", err); // Log the error details for debugging
       setError(err.message);
     } finally {
       setLoading(false);
